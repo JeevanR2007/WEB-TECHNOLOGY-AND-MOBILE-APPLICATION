@@ -1,0 +1,22 @@
+body {
+background-color: #fefefe; /* crisp white background */
+font-family: Arial, sans-serif;
+color: #d31010; /* deep slate text */
+}
+.frame-box {
+text-align: center;
+margin: 20px;
+}
+.links {
+text-align: center;
+margin-top: 30px;
+}
+.links a {
+text-decoration: none;
+color: #1e90ff; /* bright sky blue */
+font-weight: bold;
+margin: 0 10px;
+transition: color 0.3s ease;
+}
+.links a:hover {
+color: #e67e22; /* warm orange accent */}
