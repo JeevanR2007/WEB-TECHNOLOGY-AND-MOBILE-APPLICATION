@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Human Cognitive Efficiency Test - Real Life Performance Evaluation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.8); }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .animate-pulse-slow {
+            animation: pulse 1s infinite;
+        }
+        
+        .glow-effect {
+            animation: glow 2s infinite;
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .shake-effect {
+            animation: shake 0.3s ease-in-out;
+        }
+        
+        button {
+            transition: all 0.2s ease;
+        }
+        
+        button:active {
+            transform: scale(0.95);
+        }
+        
+        .card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        .test-card {
+            background: linear-gradient(135deg, rgba(107, 70, 193, 0.2), rgba(76, 29, 149, 0.2));
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .test-card:hover {
+            transform: translateY(-10px);
+            background: linear-gradient(135deg, rgba(107, 70, 193, 0.3), rgba(76, 29, 149, 0.3));
+        }
+        
+        .progress-bar {
+            transition: width 1s ease-in-out;
+        }
+        
+        .efficiency-score {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: 200% 200%;
+            animation: gradient 3s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .result-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 10s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .memory-card {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #4a5568, #2d3748);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        
+        .memory-card.flipped {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transform: rotateY(180deg);
+        }
+        
+        .memory-card.matched {
+            background: linear-gradient(135deg, #10b981, #059669);
+            cursor: default;
+            opacity: 0.7;
+        }
+        
+        .sequence-number {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .sequence-number:hover {
+            transform: scale(1.05);
+        }
+        
+        .pattern-cell {
+            transition: all 0.2s ease;
+        }
+        
+        .pattern-cell.active {
+            background: linear-gradient(135deg, #10b981, #059669);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 min-h-screen">
+    <div id="root"></div>
+
+    <script>
+        // ==================== STORAGE SERVICE ====================
+        const StorageService = {
+            getUsers: () => {
+                const users = localStorage.getItem('efficiency_users');
+                return users ? JSON.parse(users) : [];
+            },
+            saveUsers: (users) => {
+                localStorage.setItem('efficiency_users', JSON.stringify(users));
+            },
+            getResults: () => {
+                const results = localStorage.getItem('efficiency_results');
+                return results ? JSON.parse(results) : [];
+            },
+            saveResults: (results) => {
+                localStorage.setItem('efficiency_results', JSON.stringify(results));
+            },
+            getCurrentUser: () => {
+                const user = localStorage.getItem('efficiency_current_user');
+                return user ? JSON.parse(user) : null;
+            },
+            setCurrentUser: (user) => {
+                if (user) {
+                    localStorage.setItem('efficiency_current_user', JSON.stringify(user));
+                } else {
+                    localStorage.removeItem('efficiency_current_user');
+                }
+            }
+        };
+        
+        // ==================== AUTH SERVICE ====================
+        const AuthService = {
+            register: (username, email, password) => {
+                const users = StorageService.getUsers();
+                
+                if (users.find(u => u.email === email)) {
+                    throw new Error('Email already registered');
+                }
+                if (users.find(u => u.username === username)) {
+                    throw new Error('Username already taken');
+                }
+                
+                const newUser = {
+                    id: Date.now().toString(),
+                    username,
+                    email,
+                    password: btoa(password),
+                    createdAt: new Date().toISOString(),
+                    totalScore: 0,
+                    testsCompleted: 0,
+                    efficiencyScore: 0,
+                    cognitiveLevel: 'Not Assessed',
+                    testResults: {
+                        memory: null,
+                        sequence: null,
+                        pattern: null
+                    }
+                };
+                
+                users.push(newUser);
+                StorageService.saveUsers(users);
+                
+                const { password: _, ...userWithoutPassword } = newUser;
+                StorageService.setCurrentUser({ ...userWithoutPassword });
+                return { user: userWithoutPassword };
+            },
+            
+            login: (email, password) => {
+                const users = StorageService.getUsers();
+                const user = users.find(u => u.email === email && u.password === btoa(password));
+                
+                if (!user) {
+                    throw new Error('Invalid credentials');
+                }
+                
+                const { password: _, ...userWithoutPassword } = user;
+                StorageService.setCurrentUser({ ...userWithoutPassword });
+                return { user: userWithoutPassword };
+            },
+            
+            logout: () => {
+                StorageService.setCurrentUser(null);
+            },
+            
+            getCurrentUser: () => {
+                return StorageService.getCurrentUser();
+            },
+            
+            updateUserEfficiency: (userId, testType, score, metrics) => {
+                const users = StorageService.getUsers();
+                const userIndex = users.findIndex(u => u.id === userId);
+                
+                if (userIndex !== -1) {
+                    if (!users[userIndex].testResults) {
+                        users[userIndex].testResults = { memory: null, sequence: null, pattern: null };
+                    }
+                    
+                    users[userIndex].testResults[testType] = { score, metrics, completedAt: new Date().toISOString() };
+                    users[userIndex].testsCompleted = Object.values(users[userIndex].testResults).filter(r => r !== null).length;
+                    
+                    // Calculate overall efficiency when all tests are completed
+                    if (users[userIndex].testsCompleted === 3) {
+                        const memoryScore = users[userIndex].testResults.memory?.score || 0;
+                        const sequenceScore = users[userIndex].testResults.sequence?.score || 0;
+                        const patternScore = users[userIndex].testResults.pattern?.score || 0;
+                        
+                        const totalScore = (memoryScore + sequenceScore + patternScore) / 3;
+                        users[userIndex].efficiencyScore = Math.floor(totalScore);
+                        
+                        // Determine cognitive level
+                        if (totalScore >= 85) users[userIndex].cognitiveLevel = 'Genius Level';
+                        else if (totalScore >= 70) users[userIndex].cognitiveLevel = 'Excellent';
+                        else if (totalScore >= 55) users[userIndex].cognitiveLevel = 'Good';
+                        else if (totalScore >= 40) users[userIndex].cognitiveLevel = 'Average';
+                        else users[userIndex].cognitiveLevel = 'Needs Improvement';
+                    }
+                    
+                    StorageService.saveUsers(users);
+                    
+                    const currentUser = StorageService.getCurrentUser();
+                    if (currentUser && currentUser.id === userId) {
+                        currentUser.testsCompleted = users[userIndex].testsCompleted;
+                        currentUser.efficiencyScore = users[userIndex].efficiencyScore;
+                        currentUser.cognitiveLevel = users[userIndex].cognitiveLevel;
+                        currentUser.testResults = users[userIndex].testResults;
+                        StorageService.setCurrentUser(currentUser);
+                    }
+                }
+            }
+        };
+        
+        // ==================== TEST 1: MEMORY MATCH (Short-term Memory) ====================
+        class MemoryMatchTest {
+            constructor(container, onComplete, user) {
+                this.container = container;
+                this.onComplete = onComplete;
+                this.user = user;
+                this.cards = [];
+                this.flippedCards = [];
+                this.matchedPairs = 0;
+                this.moves = 0;
+                this.startTime = null;
+                this.endTime = null;
+                this.locked = false;
+                this.gameActive = true;
+                
+                this.icons = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
+                this.init();
+            }
+            
+            init() {
+                this.startTime = Date.now();
+                this.setupCards();
+                this.render();
+            }
+            
+            setupCards() {
+                let cards = [];
+                for (let icon of this.icons) {
+                    cards.push({ icon, flipped: false, matched: false, id: Math.random() });
+                    cards.push({ icon, flipped: false, matched: false, id: Math.random() });
+                }
+                
+                // Shuffle
+                for (let i = cards.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [cards[i], cards[j]] = [cards[j], cards[i]];
+                }
+                
+                this.cards = cards;
+            }
+            
+            render() {
+                this.container.innerHTML = `
+                    <div class="bg-gray-800 bg-opacity-90 rounded-2xl p-8 shadow-2xl">
+                        <div class="text-center mb-6">
+                            <h2 class="text-3xl font-bold text-white mb-2">Test 1: Memory Match</h2>
+                            <p class="text-gray-300">Test your short-term memory by matching pairs</p>
+                            <div class="flex justify-center gap-8 mt-4">
+                                <div class="bg-purple-600 rounded-lg px-4 py-2">
+                                    <span class="text-white">Moves: <span id="memory-moves">0</span></span>
+                                </div>
+                                <div class="bg-green-600 rounded-lg px-4 py-2">
+                                    <span class="text-white">Matched: <span id="memory-matched">0</span>/8</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="memory-grid" style="grid-template-columns: repeat(4, 1fr); gap: 15px; max-width: 600px; margin: 0 auto;">
+                            ${this.cards.map((card, index) => `
+                                <div class="memory-card ${card.flipped ? 'flipped' : ''} ${card.matched ? 'matched' : ''}" data-index="${index}">
+                                    <div style="transform: rotateY(180deg); display: ${card.flipped || card.matched ? 'flex' : 'none'}; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                                        ${card.icon}
+                                    </div>
+                                    <div style="display: ${card.flipped || card.matched ? 'none' : 'flex'}; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                                        ?
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="text-center mt-6">
+                            <button id="memory-submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition-all transform hover:scale-105 disabled:opacity-50" disabled>
+                                Complete Test →
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                this.attachEvents();
+            }
+            
+            attachEvents() {
+                document.querySelectorAll('.memory-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        if (!this.gameActive || this.locked) return;
+                        const index = parseInt(card.dataset.index);
+                        this.flipCard(index);
+                    });
+                });
+            }
+            
+            flipCard(index) {
+                if (this.cards[index].matched || this.cards[index].flipped) return;
+                
+                this.cards[index].flipped = true;
+                this.flippedCards.push(index);
+                this.moves++;
+                this.updateStats();
+                this.render();
+                
+                if (this.flippedCards.length === 2) {
+                    this.locked = true;
+                    setTimeout(() => this.checkMatch(), 500);
+                }
+            }
+            
+            checkMatch() {
+                const [index1, index2] = this.flippedCards;
+                const card1 = this.cards[index1];
+                const card2 = this.cards[index2];
+                
+                if (card1.icon === card2.icon) {
+                    card1.matched = true;
+                    card2.matched = true;
+                    this.matchedPairs++;
+                    this.updateStats();
+                    
+                    if (this.matchedPairs === 8) {
+                        this.endTime = Date.now();
+                        this.completeTest();
+                    }
+                } else {
+                    card1.flipped = false;
+                    card2.flipped = false;
+                }
+                
+                this.flippedCards = [];
+                this.locked = false;
+                this.render();
+            }
+            
+            updateStats() {
+                const movesSpan = document.getElementById('memory-moves');
+                const matchedSpan = document.getElementById('memory-matched');
+                if (movesSpan) movesSpan.textContent = this.moves;
+                if (matchedSpan) matchedSpan.textContent = this.matchedPairs;
+                
+                const submitBtn = document.getElementById('memory-submit');
+                if (submitBtn && this.matchedPairs === 8) {
+                    submitBtn.disabled = false;
+                }
+            }
+            
+            completeTest() {
+                this.gameActive = false;
+                const timeTaken = (this.endTime - this.startTime) / 1000;
+                const efficiencyScore = Math.max(0, Math.min(100, 
+                    Math.floor((100 - (this.moves - 8) * 2) * (1 - (timeTaken - 10) / 100))
+                ));
+                
+                const result = {
+                    score: efficiencyScore,
+                    moves: this.moves,
+                    time: timeTaken,
+                    efficiency: efficiencyScore,
+                    feedback: this.getFeedback(efficiencyScore)
+                };
+                
+                document.getElementById('memory-submit').addEventListener('click', () => {
+                    this.onComplete(result);
+                });
+            }
+            
+            getFeedback(score) {
+                if (score >= 80) return "Excellent memory! You have great short-term recall ability.";
+                if (score >= 60) return "Good memory performance. Keep practicing!";
+                if (score >= 40) return "Average memory. Regular practice can improve.";
+                return "Your memory needs improvement. Try memory exercises daily.";
+            }
+        }
+        
+        // ==================== TEST 2: SEQUENCE MEMORY (Working Memory) ====================
+        class SequenceMemoryTest {
+            constructor(container, onComplete, user) {
+                this.container = container;
+                this.onComplete = onComplete;
+                this.user = user;
+                this.sequence = [];
+                this.playerSequence = [];
+                this.level = 1;
+                this.gameActive = true;
+                this.showingSequence = false;
+                this.startTime = null;
+                
+                this.init();
+            }
+            
+            init() {
+                this.startTime = Date.now();
+                this.render();
+                this.startLevel();
+            }
+            
+            render() {
+                this.container.innerHTML = `
+                    <div class="bg-gray-800 bg-opacity-90 rounded-2xl p-8 shadow-2xl">
+                        <div class="text-center mb-6">
+                            <h2 class="text-3xl font-bold text-white mb-2">Test 2: Sequence Memory</h2>
+                            <p class="text-gray-300">Remember and repeat the sequence of numbers</p>
+                            <div class="flex justify-center gap-8 mt-4">
+                                <div class="bg-purple-600 rounded-lg px-4 py-2">
+                                    <span class="text-white">Level: <span id="seq-level">1</span></span>
+                                </div>
+                                <div class="bg-green-600 rounded-lg px-4 py-2">
+                                    <span class="text-white">Score: <span id="seq-score">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="sequence-display" class="text-center mb-8" style="min-height: 120px;">
+                            <div class="text-6xl font-bold text-white" id="current-number"></div>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-4 max-w-md mx-auto">
+                            ${[1,2,3,4,5,6,7,8,9].map(num => `
+                                <button class="seq-btn bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 rounded-lg transition-all transform hover:scale-105 text-2xl" data-number="${num}">
+                                    ${num}
+                                </button>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="text-center mt-6">
+                            <div id="seq-message" class="text-yellow-400 mb-4"></div>
+                            <button id="seq-next" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition-all transform hover:scale-105 hidden">
+                                Next Level →
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                this.attachEvents();
+            }
+            
+            attachEvents() {
+                document.querySelectorAll('.seq-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        if (!this.gameActive || this.showingSequence) return;
+                        const number = parseInt(btn.dataset.number);
+                        this.playerSequence.push(number);
+                        this.checkPlayerInput();
+                    });
+                });
+            }
+            
+            startLevel() {
+                this.playerSequence = [];
+                this.showingSequence = true;
+                this.sequence.push(Math.floor(Math.random() * 9) + 1);
+                
+                this.showSequence();
+            }
+            
+            async showSequence() {
+                const display = document.getElementById('current-number');
+                const message = document.getElementById('seq-message');
+                message.textContent = "Watch the sequence...";
+                
+                for (let i = 0; i < this.sequence.length; i++) {
+                    await this.delay(500);
+                    display.textContent = this.sequence[i];
+                    display.classList.add('animate-pulse');
+                    await this.delay(500);
+                    display.textContent = "?";
+                    display.classList.remove('animate-pulse');
+                }
+                
+                this.showingSequence = false;
+                message.textContent = "Your turn! Repeat the sequence!";
+            }
+            
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+            
+            checkPlayerInput() {
+                const currentIndex = this.playerSequence.length - 1;
+                const expectedNumber = this.sequence[currentIndex];
+                const currentNumber = this.playerSequence[currentIndex];
+                
+                if (currentNumber !== expectedNumber) {
+                    this.gameOver();
+                    return;
+                }
+                
+                if (this.playerSequence.length === this.sequence.length) {
+                    this.levelUp();
+                }
+            }
+            
+            levelUp() {
+                const levelSpan = document.getElementById('seq-level');
+                const scoreSpan = document.getElementById('seq-score');
+                const nextBtn = document.getElementById('seq-next');
+                
+                this.level++;
+                const score = (this.level - 1) * 10;
+                
+                if (levelSpan) levelSpan.textContent = this.level;
+                if (scoreSpan) scoreSpan.textContent = score;
+                
+                const message = document.getElementById('seq-message');
+                message.textContent = `Level ${this.level - 1} complete! Moving to next level...`;
+                
+                nextBtn.classList.remove('hidden');
+                nextBtn.onclick = () => {
+                    nextBtn.classList.add('hidden');
+                    this.startLevel();
+                };
+            }
+            
+            gameOver() {
+                this.gameActive = false;
+                const timeTaken = (Date.now() - this.startTime) / 1000;
+                const finalScore = (this.level - 1) * 10;
+                const efficiencyScore = Math.min(100, Math.floor((finalScore / 50) * 100));
+                
+                const result = {
+                    score: efficiencyScore,
+                    level: this.level - 1,
+                    time: timeTaken,
+                    efficiency: efficiencyScore,
+                    feedback: this.getFeedback(efficiencyScore)
+                };
+                
+                const message = document.getElementById('seq-message');
+                message.textContent = `Game Over! You reached level ${this.level - 1}`;
+                message.classList.add('text-red-400');
+                
+                setTimeout(() => {
+                    this.onComplete(result);
+                }, 1500);
+            }
+            
+            getFeedback(score) {
+                if (score >= 80) return "Excellent working memory! You can handle complex sequences well.";
+                if (score >= 60) return "Good working memory. You can improve with practice.";
+                if (score >= 40) return "Average working memory. Try sequence games to improve.";
+                return "Your working memory needs development. Regular practice helps.";
+            }
+        }
+        
+        // ==================== TEST 3: PATTERN RECOGNITION (Cognitive Flexibility) ====================
+        class PatternRecognitionTest {
+            constructor(container, onComplete, user) {
+                this.container = container;
+                this.onComplete = onComplete;
+                this.user = user;
+                this.patterns = [];
+                this.currentPattern = null;
+                this.playerPattern = [];
+                this.round = 1;
+                this.score = 0;
+                this.gameActive = true;
+                this.showingPattern = false;
+                this.startTime = null;
+                
+                this.colors = ['red', 'blue', 'green', 'yellow'];
+                this.init();
+            }
+            
+            init() {
+                this.startTime = Date.now();
+                this.render();
+                this.startRound();
+            }
+            
+            render() {
+                this.container.innerHTML = `
+                    <div class="bg-gray-800 bg-opacity-90 rounded-2xl p-8 shadow-2xl">
+                        <div class="text-center mb-6">
+                            <h2 class="text-3xl font-bold text-white mb-2">Test 3: Pattern Recognition</h2>
+                            <p class="text-gray-300">Remember and repeat the color pattern</p>
+                            <div class="flex justify-center gap-8 mt-4">
+                                <div class="bg-purple-600 rounded-lg px-4 py-2">
+                                    <span class="text-white">Round: <span id="pattern-round">1</span></span>
+                                </div>
+                                <div class="bg-green-600 rounded-lg px-4 py-2">
+                                    <span class="text-white">Score: <span id="pattern-score">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="pattern-display" class="grid grid-cols-2 gap-4 max-w-md mx-auto mb-8">
+                            ${this.colors.map(color => `
+                                <div class="pattern-cell bg-${color === 'red' ? 'red-600' : color === 'blue' ? 'blue-600' : color === 'green' ? 'green-600' : 'yellow-500'} rounded-lg p-12 cursor-pointer transition-all hover:scale-105" data-color="${color}"></div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="text-center mt-6">
+                            <div id="pattern-message" class="text-yellow-400 mb-4"></div>
+                            <button id="pattern-next" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition-all transform hover:scale-105 hidden">
+                                Next Round →
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                this.attachEvents();
+            }
+            
+            attachEvents() {
+                document.querySelectorAll('.pattern-cell').forEach(cell => {
+                    cell.addEventListener('click', (e) => {
+                        if (!this.gameActive || this.showingPattern) return;
+                        const color = cell.dataset.color;
+                        this.playerPattern.push(color);
+                        this.checkPattern();
+                        
+                        // Visual feedback
+                        cell.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            cell.style.transform = 'scale(1)';
+                        }, 100);
+                    });
+                });
+            }
+            
+            startRound() {
+                this.playerPattern = [];
+                this.showingPattern = true;
+                
+                // Add a new color to the pattern
+                const newColor = this.colors[Math.floor(Math.random() * this.colors.length)];
+                this.currentPattern = [...(this.currentPattern || []), newColor];
+                
+                this.showPattern();
+            }
+            
+            async showPattern() {
+                const message = document.getElementById('pattern-message');
+                message.textContent = "Watch the pattern...";
+                
+                for (let i = 0; i < this.currentPattern.length; i++) {
+                    const color = this.currentPattern[i];
+                    const cell = document.querySelector(`[data-color="${color}"]`);
+                    
+                    await this.delay(500);
+                    cell.style.transform = 'scale(1.1)';
+                    cell.style.boxShadow = '0 0 20px rgba(255,255,255,0.5)';
+                    
+                    await this.delay(500);
+                    cell.style.transform = 'scale(1)';
+                    cell.style.boxShadow = 'none';
+                }
+                
+                this.showingPattern = false;
+                message.textContent = "Your turn! Repeat the pattern!";
+            }
+            
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+            
+            checkPattern() {
+                const currentIndex = this.playerPattern.length - 1;
+                const expectedColor = this.currentPattern[currentIndex];
+                const playerColor = this.playerPattern[currentIndex];
+                
+                if (playerColor !== expectedColor) {
+                    this.gameOver();
+                    return;
+                }
+                
+                if (this.playerPattern.length === this.currentPattern.length) {
+                    this.roundUp();
+                }
+            }
+            
+            roundUp() {
+                this.round++;
+                this.score += 10;
+                
+                const roundSpan = document.getElementById('pattern-round');
+                const scoreSpan = document.getElementById('pattern-score');
+                const nextBtn = document.getElementById('pattern-next');
+                
+                if (roundSpan) roundSpan.textContent = this.round;
+                if (scoreSpan) scoreSpan.textContent = this.score;
+                
+                const message = document.getElementById('pattern-message');
+                message.textContent = `Round ${this.round - 1} complete! Great job!`;
+                
+                nextBtn.classList.remove('hidden');
+                nextBtn.onclick = () => {
+                    nextBtn.classList.add('hidden');
+                    this.startRound();
+                };
+            }
+            
+            gameOver() {
+                this.gameActive = false;
+                const timeTaken = (Date.now() - this.startTime) / 1000;
+                const efficiencyScore = Math.min(100, Math.floor((this.score / 100) * 100));
+                
+                const result = {
+                    score: efficiencyScore,
+                    round: this.round - 1,
+                    time: timeTaken,
+                    efficiency: efficiencyScore,
+                    feedback: this.getFeedback(efficiencyScore)
+                };
+                
+                const message = document.getElementById('pattern-message');
+                message.textContent = `Test Complete! You completed ${this.round - 1} rounds!`;
+                message.classList.add('text-green-400');
+                
+                setTimeout(() => {
+                    this.onComplete(result);
+                }, 1500);
+            }
+            
+            getFeedback(score) {
+                if (score >= 80) return "Exceptional pattern recognition! You have great cognitive flexibility.";
+                if (score >= 60) return "Good pattern recognition skills. You learn patterns efficiently.";
+                if (score >= 40) return "Average pattern recognition. Regular practice will help.";
+                return "Pattern recognition needs improvement. Try puzzle games to enhance this skill.";
+            }
+        }
+        
+        // ==================== DASHBOARD & RESULTS ====================
+        function renderDashboard(user) {
+            const testsCompleted = user.testResults ? Object.values(user.testResults).filter(r => r !== null).length : 0;
+            
+            return `
+                <div class="min-h-screen pt-20 pb-12 px-4">
+                    <div class="max-w-6xl mx-auto">
+                        <div class="efficiency-score rounded-2xl p-8 mb-8 text-center animate-slide-in shadow-2xl">
+                            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                                Human Efficiency Assessment
+                            </h1>
+                            <p class="text-xl text-purple-200">Complete all three tests to evaluate your cognitive performance</p>
+                        </div>
+                        
+                        ${user.efficiencyScore > 0 ? `
+                            <div class="result-card bg-gradient-to-r from-purple-900 to-indigo-900 rounded-2xl p-8 mb-8 shadow-2xl fade-in-up">
+                                <h2 class="text-3xl font-bold text-white mb-4 text-center">Your Overall Efficiency Score</h2>
+                                <div class="text-center">
+                                    <div class="inline-block relative">
+                                        <div class="text-8xl font-bold text-white mb-2">${user.efficiencyScore}%</div>
+                                        <div class="text-2xl text-purple-300 font-semibold">${user.cognitiveLevel}</div>
+                                    </div>
+                                </div>
+                                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    ${user.testResults?.memory ? `
+                                        <div class="bg-white bg-opacity-10 rounded-lg p-4 text-center">
+                                            <i class="fas fa-brain text-3xl text-purple-400 mb-2"></i>
+                                            <p class="text-gray-300">Memory Test</p>
+                                            <p class="text-2xl font-bold text-white">${user.testResults.memory.score}%</p>
+                                        </div>
+                                    ` : ''}
+                                    ${user.testResults?.sequence ? `
+                                        <div class="bg-white bg-opacity-10 rounded-lg p-4 text-center">
+                                            <i class="fas fa-chart-line text-3xl text-purple-400 mb-2"></i>
+                                            <p class="text-gray-300">Sequence Memory</p>
+                                            <p class="text-2xl font-bold text-white">${user.testResults.sequence.score}%</p>
+                                        </div>
+                                    ` : ''}
+                                    ${user.testResults?.pattern ? `
+                                        <div class="bg-white bg-opacity-10 rounded-lg p-4 text-center">
+                                            <i class="fas fa-puzzle-piece text-3xl text-purple-400 mb-2"></i>
+                                            <p class="text-gray-300">Pattern Recognition</p>
+                                            <p class="text-2xl font-bold text-white">${user.testResults.pattern.score}%</p>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <div class="mt-6 text-center text-gray-300">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    <span>Based on 3 cognitive tests evaluating different aspects of human efficiency</span>
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="test-card rounded-xl p-6 cursor-pointer ${user.testResults?.memory ? 'opacity-50' : 'hover:scale-105'}" onclick="window.location.hash='test-memory'">
+                                <div class="text-center">
+                                    <div class="w-20 h-20 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="fas fa-brain text-3xl text-white"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-white mb-2">Test 1: Memory Match</h3>
+                                    <p class="text-gray-300 text-sm">Short-term memory assessment</p>
+                                    ${user.testResults?.memory ? `
+                                        <div class="mt-4 bg-green-600 rounded-lg px-3 py-1 inline-block">
+                                            <span class="text-white text-sm">Completed: ${user.testResults.memory.score}%</span>
+                                        </div>
+                                    ` : '<div class="mt-4 text-yellow-400 text-sm">Not Started</div>'}
+                                </div>
+                            </div>
+                            
+                            <div class="test-card rounded-xl p-6 cursor-pointer ${user.testResults?.sequence ? 'opacity-50' : 'hover:scale-105'}" onclick="window.location.hash='test-sequence'">
+                                <div class="text-center">
+                                    <div class="w-20 h-20 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="fas fa-chart-line text-3xl text-white"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-white mb-2">Test 2: Sequence Memory</h3>
+                                    <p class="text-gray-300 text-sm">Working memory assessment</p>
+                                    ${user.testResults?.sequence ? `
+                                        <div class="mt-4 bg-green-600 rounded-lg px-3 py-1 inline-block">
+                                            <span class="text-white text-sm">Completed: ${user.testResults.sequence.score}%</span>
+                                        </div>
+                                    ` : '<div class="mt-4 text-yellow-400 text-sm">Not Started</div>'}
+                                </div>
+                            </div>
+                            
+                            <div class="test-card rounded-xl p-6 cursor-pointer ${user.testResults?.pattern ? 'opacity-50' : 'hover:scale-105'}" onclick="window.location.hash='test-pattern'">
+                                <div class="text-center">
+                                    <div class="w-20 h-20 bg-gradient-to-r from-green-600 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="fas fa-puzzle-piece text-3xl text-white"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-white mb-2">Test 3: Pattern Recognition</h3>
+                                    <p class="text-gray-300 text-sm">Cognitive flexibility assessment</p>
+                                    ${user.testResults?.pattern ? `
+                                        <div class="mt-4 bg-green-600 rounded-lg px-3 py-1 inline-block">
+                                            <span class="text-white text-sm">Completed: ${user.testResults.pattern.score}%</span>
+                                        </div>
+                                    ` : '<div class="mt-4 text-yellow-400 text-sm">Not Started</div>'}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8 text-center">
+                            <button id="logout-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition-all">
+                                <i class="fas fa-sign-out-alt mr-2"></i>
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderNavbar(user) {
+            if (!user) return '';
+            
+            return `
+                <nav class="bg-gray-900 bg-opacity-95 backdrop-blur-sm fixed w-full z-50 shadow-xl">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="flex justify-between items-center h-16">
+                            <a href="#dashboard" class="flex items-center space-x-3 cursor-pointer group">
+                                <i class="fas fa-chart-line text-3xl text-purple-500 group-hover:text-purple-400 transition-colors"></i>
+                                <span class="text-xl font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+                                    Efficiency Hub
+                                </span>
+                            </a>
+                            
+                            <div class="hidden md:flex items-center space-x-6">
+                                <a href="#dashboard" class="text-gray-300 hover:text-white transition-colors font-semibold">Dashboard</a>
+                                ${!user.testResults?.memory ? '<a href="#test-memory" class="text-gray-300 hover:text-white transition-colors">Test 1</a>' : ''}
+                                ${!user.testResults?.sequence ? '<a href="#test-sequence" class="text-gray-300 hover:text-white transition-colors">Test 2</a>' : ''}
+                                ${!user.testResults?.pattern ? '<a href="#test-pattern" class="text-gray-300 hover:text-white transition-colors">Test 3</a>' : ''}
+                                <span class="text-purple-400">Score: ${user.efficiencyScore || 0}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            `;
+        }
+        
+        function renderLogin() {
+            return `
+                <div class="min-h-screen flex items-center justify-center px-4">
+                    <div class="bg-gray-800 bg-opacity-90 backdrop-blur-sm rounded-2xl p-8 max-w-md w-full animate-slide-in shadow-2xl">
+                        <div class="text-center mb-8">
+                            <div class="inline-block p-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full mb-4">
+                                <i class="fas fa-chart-line text-4xl text-white"></i>
+                            </div>
+                            <h2 class="text-3xl font-bold text-white">Human Efficiency Test</h2>
+                            <p class="text-gray-400 mt-2">Evaluate your cognitive performance</p>
+                        </div>
+                        
+                        <form id="login-form" class="space-y-6">
+                            <div>
+                                <label class="block text-gray-300 mb-2 font-semibold">Email</label>
+                                <input type="email" id="login-email" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-all" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-300 mb-2 font-semibold">Password</label>
+                                <input type="password" id="login-password" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-all" required>
+                            </div>
+                            
+                            <div id="login-error" class="hidden bg-red-500 bg-opacity-20 border border-red-500 rounded-lg p-3 text-red-400 text-sm"></div>
+                            
+                            <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-3 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg">
+                                Start Assessment
+                            </button>
+                        </form>
+                        
+                        <div class="mt-6 text-center">
+                            <p class="text-gray-400">
+                                New user? 
+                                <a href="#register" class="text-purple-400 hover:text-purple-300 font-semibold">Create Account</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderRegister() {
+            return `
+                <div class="min-h-screen flex items-center justify-center px-4">
+                    <div class="bg-gray-800 bg-opacity-90 backdrop-blur-sm rounded-2xl p-8 max-w-md w-full animate-slide-in shadow-2xl">
+                        <div class="text-center mb-8">
+                            <div class="inline-block p-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full mb-4">
+                                <i class="fas fa-user-plus text-4xl text-white"></i>
+                            </div>
+                            <h2 class="text-3xl font-bold text-white">Create Account</h2>
+                            <p class="text-gray-400 mt-2">Begin your cognitive assessment journey</p>
+                        </div>
+                        
+                        <form id="register-form" class="space-y-6">
+                            <div>
+                                <label class="block text-gray-300 mb-2 font-semibold">Username</label>
+                                <input type="text" id="register-username" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-all" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-300 mb-2 font-semibold">Email</label>
+                                <input type="email" id="register-email" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-all" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-300 mb-2 font-semibold">Password</label>
+                                <input type="password" id="register-password" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-all" required>
+                            </div>
+                            
+                            <div id="register-error" class="hidden bg-red-500 bg-opacity-20 border border-red-500 rounded-lg p-3 text-red-400 text-sm"></div>
+                            
+                            <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-3 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg">
+                                Create Account
+                            </button>
+                        </form>
+                        
+                        <div class="mt-6 text-center">
+                            <p class="text-gray-400">
+                                Already have an account? 
+                                <a href="#login" class="text-purple-400 hover:text-purple-300 font-semibold">Login</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ==================== APP ROUTER ====================
+        let currentUser = null;
+        let currentTest = null;
+        
+        function loadPage() {
+            const hash = window.location.hash.slice(1) || 'login';
+            currentUser = AuthService.getCurrentUser();
+            
+            let content = '';
+            
+            if (currentUser && hash !== 'login' && hash !== 'register') {
+                content += renderNavbar(currentUser);
+            } else if (!currentUser && (hash === 'dashboard' || hash === 'test-memory' || hash === 'test-sequence' || hash === 'test-pattern')) {
+                window.location.hash = 'login';
+                return;
+            }
+            
+            switch (hash) {
+                case 'login':
+                    content += renderLogin();
+                    break;
+                case 'register':
+                    content += renderRegister();
+                    break;
+                case 'dashboard':
+                    content += renderDashboard(currentUser);
+                    break;
+                default:
+                    if (hash === 'test-memory' && currentUser && !currentUser.testResults?.memory) {
+                        content += `<div class="min-h-screen pt-20 pb-12 px-4"><div class="max-w-4xl mx-auto" id="test-container"></div></div>`;
+                        document.getElementById('root').innerHTML = content;
+                        const container = document.getElementById('test-container');
+                        currentTest = new MemoryMatchTest(container, (result) => {
+                            AuthService.updateUserEfficiency(currentUser.id, 'memory', result.score, result);
+                            window.location.hash = 'dashboard';
+                            loadPage();
+                        }, currentUser);
+                        return;
+                    } else if (hash === 'test-sequence' && currentUser && !currentUser.testResults?.sequence) {
+                        content += `<div class="min-h-screen pt-20 pb-12 px-4"><div class="max-w-4xl mx-auto" id="test-container"></div></div>`;
+                        document.getElementById('root').innerHTML = content;
+                        const container = document.getElementById('test-container');
+                        currentTest = new SequenceMemoryTest(container, (result) => {
+                            AuthService.updateUserEfficiency(currentUser.id, 'sequence', result.score, result);
+                            window.location.hash = 'dashboard';
+                            loadPage();
+                        }, currentUser);
+                        return;
+                    } else if (hash === 'test-pattern' && currentUser && !currentUser.testResults?.pattern) {
+                        content += `<div class="min-h-screen pt-20 pb-12 px-4"><div class="max-w-4xl mx-auto" id="test-container"></div></div>`;
+                        document.getElementById('root').innerHTML = content;
+                        const container = document.getElementById('test-container');
+                        currentTest = new PatternRecognitionTest(container, (result) => {
+                            AuthService.updateUserEfficiency(currentUser.id, 'pattern', result.score, result);
+                            window.location.hash = 'dashboard';
+                            loadPage();
+                        }, currentUser);
+                        return;
+                    } else {
+                        window.location.hash = 'dashboard';
+                        return;
+                    }
+            }
+            
+            document.getElementById('root').innerHTML = content;
+            attachEventListeners();
+        }
+        
+        function attachEventListeners() {
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('login-email').value;
+                    const password = document.getElementById('login-password').value;
+                    const errorDiv = document.getElementById('login-error');
+                    
+                    try {
+                        const result = AuthService.login(email, password);
+                        currentUser = result.user;
+                        window.location.hash = 'dashboard';
+                        loadPage();
+                    } catch (err) {
+                        errorDiv.textContent = err.message;
+                        errorDiv.classList.remove('hidden');
+                    }
+                });
+            }
+            
+            const registerForm = document.getElementById('register-form');
+            if (registerForm) {
+                registerForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const username = document.getElementById('register-username').value;
+                    const email = document.getElementById('register-email').value;
+                    const password = document.getElementById('register-password').value;
+                    const errorDiv = document.getElementById('register-error');
+                    
+                    try {
+                        const result = AuthService.register(username, email, password);
+                        currentUser = result.user;
+                        window.location.hash = 'dashboard';
+                        loadPage();
+                    } catch (err) {
+                        errorDiv.textContent = err.message;
+                        errorDiv.classList.remove('hidden');
+                    }
+                });
+            }
+            
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    AuthService.logout();
+                    currentUser = null;
+                    window.location.hash = 'login';
+                    loadPage();
+                });
+            }
+        }
+        
+        window.addEventListener('hashchange', loadPage);
+        loadPage();
+    </script>
+</body>
+</html>
